@@ -44,9 +44,8 @@ def register():
         return json.dumps(message.__dict__)
     # 用户名未重复,所以可以进行注册操作
     id = add_user(uname,password)
-    user = User(uname, password)
-    user.id = id
-    session['user'] = user.__dict__
+    user = {'id':id, 'uname':uname, 'password': password}
+    session['user'] = user
     return json.dumps(message.__dict__)
 
 
@@ -93,8 +92,10 @@ def download_photo():
         print(photos)
         for photo in photos:
             with open(r'{}/static/photo/{}'.format(basedir,photo.name),'rb') as f:
-                print(f.name)
-                list.append(base64.b64encode(f.read()).decode())
+                id = 0
+                photo = {'id': ++id, 'name':f.name.rsplit('/',1)[1],'content':base64.b64encode(f.read()).decode()}
+                print(photo)
+                list.append(photo)
         print(list)
         return json.dumps(list)
 
