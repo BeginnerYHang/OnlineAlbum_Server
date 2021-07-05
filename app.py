@@ -3,7 +3,7 @@ import random
 import base64
 from datetime import datetime
 
-from flask import Flask, request, json, session
+from flask import Flask, request, json, session, make_response
 
 from com.yuanhang.model import Message, find_user_by_name, add_user, find_user, User, save_photo, find_photos_by_uid
 
@@ -77,27 +77,20 @@ def upload_photo():
     file_path = path + filename + '.' + img.filename.rsplit('.', 1)[1]
     # 上传成功后需要将用户id和图片
     if session['user'] is not None:
-        save_photo(filename + '.' + img.filename.rsplit('.', 1)[1], session['user']['id'])
+        save_photo(filename + '.' + img.filename.rsplit('.', 1)[1], session['user']['id'], datetime.today().isoformat())
         img.save(file_path)
     return json.dumps(message.__dict__)
+
 
 #  根据session中的用户数据查询photo中的路径名称
 @app.route('/download_photo', methods=['get','post'])
 def download_photo():
+    photoByDate = None
     if session['user'] is not None:
         id = session['user']['id']
-        photos = find_photos_by_uid(id)
+        photoByDate = find_photos_by_uid(id)
         # 将图片转为Base64编码格式
-        list = []
-        print(photos)
-        for photo in photos:
-            with open(r'{}/static/photo/{}'.format(basedir,photo.name),'rb') as f:
-                id = 0
-                photo = {'id': ++id, 'name':f.name.rsplit('/',1)[1],'content':base64.b64encode(f.read()).decode()}
-                print(photo)
-                list.append(photo)
-        print(list)
-        return json.dumps(list)
+    return json.dumps(photoByDate)
 
 
 
